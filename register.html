@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">JOIN</a>
+        <span class="ms-auto mx-2" id="userName"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="main.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="main.html">Lists</a>
+            </li>
+            
+            <li class="nav-item">
+              <a class="nav-link" href="upload.html">Photo Upload</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Login</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+   
+  <!-- include only the Firebase features as you need -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+  <link href="main.css" rel="stylesheet">
+    <title>Welcome to Firebase Hosting</title>
+  </head>
+
+  <body>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyA7VJJ0FifoLNNZuwz97sY8XCnpdH-iOuE",
+        authDomain: "timebridge-2301.firebaseapp.com",
+        databaseURL: "https://timebridge-2301-default-rtdb.firebaseio.com",
+        projectId: "timebridge-2301",
+        storageBucket: "timebridge-2301.appspot.com",
+        messagingSenderId: "486255936313",
+        appId: "1:486255936313:web:24fed97f8839d405821ee8",
+        measurementId: "G-XJZY3Q76LL"
+      };
+      firebase.initializeApp(firebaseConfig);
+
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+    </script>
+   
+   <div class="container mt-3">
+      <div class="mb-3">
+        <input type="text" class="form-control" placeholder="name" id="name-new">
+      </div>
+      <div class="mb-3">
+        <input type="email" class="form-control" placeholder="email" id="email-new">
+      </div>
+      <div class="mb-3">
+        <input type="password" class="form-control" placeholder="pw" id="pw-new">
+      </div>
+      <button type="submit" class="btn btn-primary" id="register">JOIN</button>
+      <p id="register-success"></p>
+    </div>
+
+    
+ <script>
+    
+    firebase.auth().onAuthStateChanged((user)=>{
+      if (user) {
+        console.log(user.uid)
+        console.log(user.displayName)
+        localStorage.setItem('user',JSON.stringify(user))
+        
+      }
+    })
+
+    $('#register').click(function(){
+  
+    var email = $('#email-new').val();
+    var password = $('#pw-new').val();
+    var name = $('#name-new').val();
+
+    firebase.auth().createUserWithEmailAndPassword(email, password).then((result)=>{
+      var userInfo = {
+        name : name,
+        email : email
+      }
+      db.collection('user').doc(result.user.uid).set(userInfo)
+        console.log(result.user);
+        result.user.updateProfile({displayName : name})
+        $('#register-success').html('welcome ' + name)
+        window.location.href = '/index.html';
+      })
+    .catch((error)=>{
+      $('#register-success').html(error.code)
+    })
+   })
+ </script>
+  
+</body>
+</html>

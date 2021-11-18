@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Album</a>
+        <span class="ms-auto mx-2" id="userName"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="list.html">HOME</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="list.html">사진목록</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="multiload.html">Multi사진올리기</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Login/Logout</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+   
+  <!-- include only the Firebase features as you need -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+  <link href="main.css" rel="stylesheet">
+    <title>Welcome to Firebase Hosting</title>
+  </head>
+
+  <body>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyA7VJJ0FifoLNNZuwz97sY8XCnpdH-iOuE",
+        authDomain: "timebridge-2301.firebaseapp.com",
+        databaseURL: "https://timebridge-2301-default-rtdb.firebaseio.com",
+        projectId: "timebridge-2301",
+        storageBucket: "timebridge-2301.appspot.com",
+        messagingSenderId: "486255936313",
+        appId: "1:486255936313:web:24fed97f8839d405821ee8",
+        measurementId: "G-XJZY3Q76LL"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+    </script>
+   
+    <!-- Firebase 에 Data Upload -->
+    
+    <div class="container mt-3">
+      <input type="text" class="form-control mt-2" id="title" placeholder="title">
+      <textarea class="form-control mt-2" id="content" placeholder="content"></textarea>
+      <br><br>
+      <label for="category">Category:</label>
+      <select name="category" id="category">
+        <option value="Others">Time-Bridge</option>
+        <option value="Travel">Monterey Park</option>
+        <option value="Event">Al Hambra/option>
+        <option value="Others">OTHER</option>
+      </select>
+      <br><br>
+      <div>
+      <input class="form-control mt-2" type="file" id="image">
+      <button class="btn btn-danger mt-3" id="send">사진올리기</button>
+      <p id="upload-success"></p>
+      <img class="thumbnail" id="blah" src="#" alt="your image" />
+      </div>
+     
+    </div>
+   
+    <script>
+        var imageid;
+        var userInfo = localStorage.getItem('user')
+        $('#userName').html(JSON.parse(userInfo).displayName)
+
+        $('#image').change(function(){
+            const [file] = image.files
+            if (file) {
+                blah.src = URL.createObjectURL(file)
+            }
+            })
+                       
+                
+        $('#send').click(function(){
+
+            var file = document.querySelector('#image').files[0];
+            var storageRef = storage.ref();
+            var storagePath = storageRef.child('image/' + file.name);
+            var upload작업 = storagePath.put(file);
+
+            upload작업.on( 'state_changed', 
+            // 변화시 동작하는 함수 
+            null, 
+            //에러시 동작하는 함수
+            (error) => {
+              console.error('error message', error);
+            }, 
+            // 성공시 동작하는 함수
+            () => {
+              upload작업.snapshot.ref.getDownloadURL().then((url) => {
+                console.log('upload Path', url);
+               
+                var item = {
+                title : $('#title').val(), 
+                content : $('#content').val(),
+                category : $('#category').val(),
+                imageid: file.name,
+                date : new Date(),
+                image: url,
+                uid : JSON.parse(localStorage.getItem('user')).uid,
+                name: JSON.parse(localStorage.getItem('user')).displayName
+            }
+            db.collection('product').add(item).then((result)=> {
+                console.log(result);
+                $('#upload-success').html('사진이 올려졌습니다');
+               
+            }).catch((error)=>{
+              console.log(error);
+              $('#upload-success').html(error);
+            })
+
+              });
+            }
+        );
+        
+    })
+    </script>
+  
+  </body>
+</html>

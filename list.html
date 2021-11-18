@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <link href="main.css" rel="stylesheet">
+    <title>Welcome to Firebase Hosting</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-position">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Album</a>
+        <span class="ms-auto mx-2" id="userName"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+           
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                분류
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" id="family" href="#">가족</a></li>
+                <li><a class="dropdown-item" id="travel" href="#">여행</a></li>
+                <li><a class="dropdown-item" id="event" href="#">행사</a></li>
+                <li><a class="dropdown-item" id="others" href="#">기타</a></li>
+                <li><hr class="dropdown-divider"></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="upload.html">사진올리기</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="multiload.html">Multi사진올리기</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Login/Logout</a>
+            </li>
+      </nav>
+    <!-- update the version number as needed -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyA7VJJ0FifoLNNZuwz97sY8XCnpdH-iOuE",
+        authDomain: "timebridge-2301.firebaseapp.com",
+        databaseURL: "https://timebridge-2301-default-rtdb.firebaseio.com",
+        projectId: "timebridge-2301",
+        storageBucket: "timebridge-2301.appspot.com",
+        messagingSenderId: "486255936313",
+        appId: "1:486255936313:web:24fed97f8839d405821ee8",
+        measurementId: "G-XJZY3Q76LL"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+    </script>
+    <!-- Firebase 에서 저장된 data 가져오기 -->
+    <script>
+      
+       var userInfo = localStorage.getItem('user')
+       $('#userName').html(JSON.parse(userInfo).displayName)
+         
+      db.collection('product').orderBy('date', 'desc').get().then((result)=>{
+        result.forEach((doc)=>{
+         var newdate = Date(doc.data().date.seconds)
+         var filetype = doc.data().filetype;
+        
+         if (filetype != "video/mp4") {
+         var template = `<div class="product">
+            <div class="thumbnail-container">
+            <div class="thumbnail" style="background-image: url('${doc.data().image}')">
+            </div>
+            </div>
+            <div class="flex-grow-1 p-4">
+            <h5 class="title"><a href="/detail.html?id=${doc.id}">${doc.data().title}</a></h5>
+              
+            <p class="content">${doc.data().content}</p>
+            <p class="content">${doc.data().imageid}</p>
+            <p class="family">${"올린사람 : " + doc.data().name}</p>
+            <p class="date" >${newdate}</p>
+            <h5 class="edit-button"><a href="/edit.html?id=${doc.id}">수정</a></h5>
+            <p class="float-end">🤍0</p>
+              
+      </div>
+      </div>`; 
+      } else {   var template = `<div class="product">
+            <div class="thumbnail-container">
+              <div class="thumbnail">
+                <video class="thumbnail" src="${doc.data().image}" controls>
+              </div>
+            </div>
+            </div>
+            <div class="flex-grow-1 p-4">
+            <h5 class="title"><a href="/detail.html?id=${doc.id}">${doc.data().title}</a></h5>
+              
+            <p class="content">${doc.data().content}</p>
+            <p class="content">${doc.data().imageid}</p>
+            <p class="family">${"올린사람 : " + doc.data().name}</p>
+            <p class="date" >${newdate}</p>
+            <h5 class="edit-button"><a href="/edit.html?id=${doc.id}">수정</a></h5>
+            <p class="float-end">🤍0</p>
+              
+      </div>
+      </div>`; } 
+
+      $('.container').append(template)
+    })
+
+    $('#chat').click(function(){
+
+    var owneruid; 
+    db.collection('product').doc(doc.id).get().then((result)=>{
+      ownerid = result.data().uid;
+    })
+    var myuid = JSON.parse( localStorage.getItem('user') ).uid; 
+    var info = {
+      who: [myuid, owneruid],
+      title: title,
+      date : new Date()
+    }
+    db.collection('chatroom').add(info).then((uploadresult)=> {
+    console.log(uploadresult);
+    window.location.href = '/chat.html';
+    }).catch((error)=> {console.log(error);
+    })
+    })
+  })
+    </script> 
+    
+     <div class="container mt-3">
+      
+    </div> 
+  </body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Album</a>
+        <span class="ms-auto mx-2" id="userName"></span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="list.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="list.html">사진목록</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Category
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#">가정</a></li>
+                <li><a class="dropdown-item" href="#">여행</a></li>
+                <li><a class="dropdown-item" href="#">행사</a></li>
+                <li><a class="dropdown-item" href="#">기타</a></li>
+                <li><hr class="dropdown-divider"></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="upload.html">사진올리기</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Login/Logout</a>
+            </li>
+           </ul>
+        </div>
+      </div>
+    </nav>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+   
+  <!-- include only the Firebase features as you need -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-storage.js"></script>
+  <link href="main.css" rel="stylesheet">
+    <title>Welcome to Firebase Hosting</title>
+  </head>
+
+  <body>
+    <script>
+      var firebaseConfig = {
+        apiKey: "AIzaSyA7VJJ0FifoLNNZuwz97sY8XCnpdH-iOuE",
+        authDomain: "timebridge-2301.firebaseapp.com",
+        databaseURL: "https://timebridge-2301-default-rtdb.firebaseio.com",
+        projectId: "timebridge-2301",
+        storageBucket: "timebridge-2301.appspot.com",
+        messagingSenderId: "486255936313",
+        appId: "1:486255936313:web:24fed97f8839d405821ee8",
+        measurementId: "G-XJZY3Q76LL"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+    </script>
+    <hr>
+       
+    <div class="container mt-3">
+      <label>TITLE</label>
+      <input type="text" class="form-control mt-2" id="title" placeholder="title">
+      <label>CONTENTS</label>
+      <textarea class="form-control mt-2" id="content" placeholder="content"></textarea>
+      <br>
+      <label>DETAIL</label>
+      <textarea class="form-control mt-2" id="detail" placeholder="detail"></textarea>
+      <br>
+      <label for="category">CATEGORY:</label>
+      <select name="category" id="category">
+        <option value="가정">가정</option>
+        <option value="여행">여행</option>
+        <option value="행사">행사</option>
+        <option value="기타">기타</option>
+      </select>
+      <br><br>
+      <input type="text" class="form-control mt-2" id="url" placeholder="image">
+      <input type="text" class="form-control mt-2" id="imageid" placeholder="imageFile.jpg">
+      <button class="btn btn-danger mt-3" id="send">Update</button>
+      <button class="btn btn-danger mt-3" id="delete">Delete</button>
+      <p id="modify-success"></p>
+    </div>
+    <script>
+        var url;
+        var imageid;
+        var filetype;
+        var userInfo = localStorage.getItem('user')
+        var userName;
+        var author;
+        var name;
+        userName = JSON.parse(userInfo).displayName
+        $('#userName').html(userName)
+            
+        var queryString = new URLSearchParams(window.location.search);
+        
+          db.collection('product').doc(queryString.get('id')).get().then((result)=>{
+
+            filetype = result.data().filetype;
+            if (filetype == "video/mp4") 
+            { window.location.href = '/videoedit.html?id=' + queryString.get('id')
+            } else
+            {  
+     
+             
+            imageid = result.data().imageid
+           
+            var template = `<div class="product">
+                <div class="thumbnail" style="background-image: url('${result.data().image}')">
+                </div>
+
+                <div class="flex-grow-1 p-4">
+                 
+                  <h5 class="title">${result.data().title}</h5>
+                  <p class="content">${result.data().imageid}</p>
+                  <p class="content">${result.data().image}</p>
+                  <p class="author">${"Uploaded BY : " + result.data().name}</p>
+                 
+                </div>
+                
+              </div>`;
+            $('.container').append(template)
+            
+            author = result.data().name
+            name = result.data().name
+            var url = result.data().image
+              $('.thumbnail').css('background-image', 'url(url);')
+              $('.title').html(result.data().title)
+              $('.content').html(result.data().content)
+              $('#detail').html(result.data().detail)
+              $('#imageid').html(result.data().imageid)
+              $('.name').html(result.data().name)
+              $('#author').html("Uploaded By: " + result.data().name)
+                            
+              $('#title').val(result.data().title)
+              $('#content').val(result.data().content)
+              $('#detail').val(result.data().detail)
+              $('#category').val(result.data().category)
+              $('#url').val(result.data().image)
+              $('#imageid').val(result.data().imageid)
+            }
+          })
+        
+          $('#send').click(function(){
+                
+          var updateItem = {
+            title : $('#title').val(), 
+            content : $('#content').val(),
+            detail : $('#detail').val(),
+            category : $('#category').val(),
+            name : userName,
+            imageid: $('#imageid').val(),
+            update : new Date(),
+            }
+         
+           db.collection('product').doc(queryString.get('id')).update(updateItem).then(()=>{
+            $('#modify-success').html('내용이 수정 되었습니다');
+            window.location.href = '/list.html';
+          })
+        })
+        
+        $('#delete').click(function(){
+              
+              url = $('#url').val(),
+              imageid = $('#imageid').val(),
+              console.log(imageid);
+          var storageRef = storage.ref();
+          var desertRef = storageRef.child('image/' + imageid);  
+              console.log(desertRef);
+              desertRef.delete().then(() => {
+              $('#modify-success').html("File deleted successfully");
+           
+            }).catch((error) => {
+             console.log(error)
+          }); 
+         
+          //delete firestore record    
+                       
+          db.collection('product').doc(queryString.get('id')).delete().then(()=>{
+            $('#modify-success').html('내용이 삭제 되었습니다');
+             window.location.href = 'list.html';
+          }).catch((error)=>{
+            $('#modify-success').html(error);
+          })
+        })
+         
+         </script>
+   
+    
+  </body>
+</html>
